@@ -115,6 +115,7 @@ def prepare_training_frame(
     valid_cols = [c for c in cols if c in df.columns]
     work = df.dropna(subset=valid_cols + [target]).copy()
     X = work[valid_cols]
+    X = pd.DataFrame(X.to_numpy(dtype=float), columns=valid_cols, index=X.index)
     y = work[target]
     return X, y
 
@@ -135,7 +136,7 @@ def train_and_evaluate(
     X, y = prepare_training_frame(df, target, feature_cols)
 
     encoder: Optional[LabelEncoder] = None
-    if y.dtype == object or str(y.dtype) == "category":
+    if pd.api.types.is_string_dtype(y) or str(y.dtype) == "category":
         encoder = LabelEncoder()
         y_enc = encoder.fit_transform(y)
         classes = list(encoder.classes_)
